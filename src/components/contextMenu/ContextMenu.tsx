@@ -1,8 +1,29 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 
 const ContextMenu = ({ onCopy, onDelete, onRename, x, y, visible, file }) => {
   // Use local state to manage the visibility
   const [isVisible, setIsVisible] = useState(false);
+  const contextMenuRef = useRef(null);
+
+  useEffect(() => {
+    // Add a click event listener to the document
+    document.addEventListener("click", handleClickOutside);
+
+    return () => {
+      // Remove the event listener
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
+
+  const handleClickOutside = (event) => {
+    // Check if the click event target is not within the menu
+    if (
+      contextMenuRef.current &&
+      !contextMenuRef.current.contains(event.target)
+    ) {
+      setIsVisible(false);
+    }
+  };
 
   // Set up a timer to delay the context menu appearance
   useEffect(() => {
@@ -64,6 +85,7 @@ const ContextMenu = ({ onCopy, onDelete, onRename, x, y, visible, file }) => {
       id="context-menu"
       onContextMenu={handleContextMenu}
       className="context-menu"
+      ref={contextMenuRef}
     >
       <ul>
         <li onClick={handleCopy}>Copy</li>
